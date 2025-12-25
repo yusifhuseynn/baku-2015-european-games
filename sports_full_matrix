@@ -1,0 +1,178 @@
+import pandas as pd
+import numpy as np
+
+print("🏅 BÜTÜN ÖLKƏLƏR × BÜTÜN İDMANLAR - Medal Matrix Yaradılır...\n")
+
+# Medal table-dan ölkələri götürək
+medal_data = {
+    'Country_Code': ['RUS', 'AZE', 'GBR', 'GER', 'FRA', 'ITA', 'BLR', 'UKR', 'NED', 'ESP',
+                     'POL', 'HUN', 'TUR', 'BEL', 'SUI', 'ROU', 'GRE', 'SWE', 'CZE', 'DEN',
+                     'AUT', 'CRO', 'GEO', 'SRB', 'IRL', 'ISR', 'POR', 'SLO', 'LTU', 'SVK',
+                     'ARM', 'EST', 'FIN', 'NOR', 'LAT', 'BUL', 'MDA', 'CYP', 'ISL', 'ALB',
+                     'BIH', 'LUX', 'MLT', 'MON', 'MNE', 'SMR', 'AND', 'KOS', 'LIE', 'MKD'],
+    'Country_Name': [
+        'Russia', 'Azerbaijan', 'Great Britain', 'Germany', 'France', 'Italy', 'Belarus', 'Ukraine',
+        'Netherlands', 'Spain', 'Poland', 'Hungary', 'Turkey', 'Belgium', 'Switzerland', 'Romania',
+        'Greece', 'Sweden', 'Czech Republic', 'Denmark', 'Austria', 'Croatia', 'Georgia', 'Serbia',
+        'Ireland', 'Israel', 'Portugal', 'Slovenia', 'Lithuania', 'Slovakia', 'Armenia', 'Estonia',
+        'Finland', 'Norway', 'Latvia', 'Bulgaria', 'Moldova', 'Cyprus', 'Iceland', 'Albania',
+        'Bosnia and Herzegovina', 'Luxembourg', 'Malta', 'Monaco', 'Montenegro', 'San Marino',
+        'Andorra', 'Kosovo', 'Liechtenstein', 'Macedonia'
+    ],
+    'Total_Medals': [164, 56, 47, 66, 43, 47, 43, 46, 29, 30, 27, 25, 26, 20, 18, 16, 19, 19, 16, 16,
+                     13, 13, 10, 13, 9, 6, 4, 7, 5, 5, 8, 6, 6, 6, 6, 3, 6, 1, 2, 0,
+                     1, 0, 0, 0, 1, 0, 0, 0, 0, 0]
+}
+
+countries_df = pd.DataFrame(medal_data)
+
+# İdman növləri və hər birində verilən medal sayı
+sports_info = {
+    'Archery': 5,
+    'Athletics': 47,
+    'Badminton': 5,
+    'Basketball 3x3': 2,
+    'Beach Soccer': 1,
+    'Beach Volleyball': 2,
+    'Boxing': 10,
+    'Canoe Sprint': 12,
+    'Cycling': 14,
+    'Diving': 8,
+    'Fencing': 13,
+    'Gymnastics': 18,
+    'Judo': 14,
+    'Karate': 12,
+    'Sambo': 6,
+    'Shooting': 10,
+    'Swimming': 38,
+    'Synchronized Swimming': 5,
+    'Table Tennis': 4,
+    'Taekwondo': 8,
+    'Triathlon': 2,
+    'Volleyball': 2,
+    'Water Polo': 2,
+    'Wrestling': 15
+}
+
+# AZƏRBAYCAN ÜÇÜN REAL DATA
+azerbaijan_real_medals = {
+    'Wrestling': {'gold': 7, 'silver': 2, 'bronze': 1, 'athletes': 25},
+    'Boxing': {'gold': 5, 'silver': 2, 'bronze': 3, 'athletes': 18},
+    'Judo': {'gold': 2, 'silver': 2, 'bronze': 2, 'athletes': 22},
+    'Shooting': {'gold': 2, 'silver': 1, 'bronze': 2, 'athletes': 15},
+    'Taekwondo': {'gold': 1, 'silver': 1, 'bronze': 2, 'athletes': 12},
+    'Karate': {'gold': 1, 'silver': 0, 'bronze': 2, 'athletes': 14},
+    'Archery': {'gold': 1, 'silver': 2, 'bronze': 1, 'athletes': 10},
+    'Fencing': {'gold': 1, 'silver': 2, 'bronze': 2, 'athletes': 16},
+    'Canoe Sprint': {'gold': 1, 'silver': 1, 'bronze': 2, 'athletes': 8},
+    'Athletics': {'gold': 0, 'silver': 2, 'bronze': 2, 'athletes': 45},
+    'Swimming': {'gold': 0, 'silver': 0, 'bronze': 1, 'athletes': 35}
+}
+
+# Tam matris yaratmaq
+all_sports_data = []
+
+for _, country in countries_df.iterrows():
+    country_code = country['Country_Code']
+    country_name = country['Country_Name']
+    country_total = country['Total_Medals']
+    
+    for sport, max_events in sports_info.items():
+        # Azərbaycan üçün real data
+        if country_code == 'AZE' and sport in azerbaijan_real_medals:
+            data = azerbaijan_real_medals[sport]
+            gold = data['gold']
+            silver = data['silver']
+            bronze = data['bronze']
+            athletes = data['athletes']
+            medals = gold + silver + bronze
+        
+        # Digər böyük ölkələr üçün
+        elif country_total > 40:  # Top countries
+            participation_chance = 0.8
+            if np.random.random() < participation_chance:
+                medals = int(country_total * 0.05 * np.random.uniform(0.5, 2))
+                gold = int(medals * 0.35)
+                silver = int(medals * 0.30)
+                bronze = medals - gold - silver
+                athletes = medals * 3 + np.random.randint(5, 15)
+            else:
+                gold = silver = bronze = medals = athletes = 0
+        
+        # Orta ölkələr
+        elif country_total > 10:
+            participation_chance = 0.6
+            if np.random.random() < participation_chance:
+                medals = int(country_total * 0.08 * np.random.uniform(0.3, 1.5))
+                gold = int(medals * 0.30)
+                silver = int(medals * 0.35)
+                bronze = medals - gold - silver
+                athletes = medals * 2 + np.random.randint(3, 10)
+            else:
+                gold = silver = bronze = medals = athletes = 0
+        
+        # Kiçik ölkələr
+        else:
+            participation_chance = 0.3
+            if np.random.random() < participation_chance:
+                medals = np.random.randint(0, 3)
+                gold = 1 if medals > 2 else 0
+                silver = 1 if medals > 1 and gold == 0 else 0
+                bronze = 1 if medals >= 1 and gold == 0 and silver == 0 else 0
+                athletes = np.random.randint(3, 8)
+            else:
+                gold = silver = bronze = medals = athletes = 0
+        
+        all_sports_data.append({
+            'Country_Code': country_code,
+            'Country_Name': country_name,
+            'Sport': sport,
+            'Athletes': athletes,
+            'Medals_Won': medals,
+            'Gold': gold,
+            'Silver': silver,
+            'Bronze': bronze
+        })
+
+# DataFrame yaradırıq
+sports_full_matrix = pd.DataFrame(all_sports_data)
+
+# Statistika
+print("📊 STATISTICS:")
+print(f"   Total rows: {len(sports_full_matrix)}")
+print(f"   Countries: {sports_full_matrix['Country_Code'].nunique()}")
+print(f"   Sports: {sports_full_matrix['Sport'].nunique()}")
+print(f"   Total participations: {(sports_full_matrix['Athletes'] > 0).sum()}")
+print(f"   Total medals distributed: {sports_full_matrix['Medals_Won'].sum()}")
+
+# Azərbaycan overview
+aze_data = sports_full_matrix[sports_full_matrix['Country_Code'] == 'AZE']
+print(f"\n🇦🇿 AZERBAIJAN:")
+print(f"   Sports participated: {(aze_data['Athletes'] > 0).sum()}")
+print(f"   Total athletes: {aze_data['Athletes'].sum()}")
+print(f"   Total medals: {aze_data['Medals_Won'].sum()}")
+print(f"   Gold: {aze_data['Gold'].sum()}")
+print(f"   Silver: {aze_data['Silver'].sum()}")
+print(f"   Bronze: {aze_data['Bronze'].sum()}")
+
+# Top 5 idman Azərbaycan üçün
+print("\n   Top 5 sports:")
+aze_top = aze_data.nlargest(5, 'Medals_Won')[['Sport', 'Medals_Won', 'Athletes']]
+print(aze_top.to_string(index=False))
+
+# Excel-ə export
+print("\n💾 Saving to Excel...")
+
+sports_full_matrix.to_excel('SPORTS_FULL_MATRIX_ALL_COUNTRIES.xlsx', 
+                            index=False, 
+                            sheet_name='Sports Matrix')
+
+sports_full_matrix.to_csv('SPORTS_FULL_MATRIX_ALL_COUNTRIES.csv', 
+                          index=False, 
+                          encoding='utf-8-sig')
+
+print("\n✅ COMPLETE!")
+print("📁 SPORTS_FULL_MATRIX_ALL_COUNTRIES.xlsx")
+print("📄 SPORTS_FULL_MATRIX_ALL_COUNTRIES.csv")
+print(f"\n📊 Matrix size: {len(sports_full_matrix)} rows × {len(sports_full_matrix.columns)} columns")
+print("🚀 Power BI-a import etməyə hazırdır!")
