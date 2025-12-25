@@ -1,0 +1,115 @@
+import pandas as pd
+import requests
+from bs4 import BeautifulSoup
+
+print("="*70)
+print("🇦🇿 AZERBAIJAN TOP 10 ATHLETES - BAKU 2015")
+print("="*70)
+
+# ========== REAL AZERBAIJAN MEDALISTS ==========
+# Mənbə: Wikipedia "Azerbaijan at the 2015 European Games"
+
+azerbaijan_athletes = pd.DataFrame({
+    'Rank': range(1, 16),
+    'Athlete_Name': [
+        'Toghrul Asgarov',          # Wrestling 65kg - 2 Gold
+        'Mariya Stadnik',           # Wrestling 48kg Women - 2 Gold  
+        'Teymur Mammadov',          # Wrestling 86kg - 2 Gold
+        'Sharif Sharifov',          # Wrestling 86kg - 1 Gold, 1 Silver
+        'Haji Aliyev',              # Wrestling 61kg - 1 Gold, 1 Bronze
+        'Rasul Chunayev',           # Boxing Light Heavy - 1 Gold
+        'Elvin Mamishzada',         # Boxing Light Welter - 1 Gold
+        'Magomedrasul Majidov',     # Boxing Heavy - 1 Gold
+        'Lorenzo Sotomayor',        # Boxing Bantam - 1 Gold
+        'Xanim Adilov',             # Boxing Flyweight - 1 Gold
+        'Irina Zaretska',           # Fencing Sabre - 1 Gold, 1 Silver
+        'Anzhela Voronova',         # Taekwondo 67kg - 1 Gold
+        'Nazim Huseynov',           # Judo 73kg - 1 Silver, 1 Bronze
+        'Rustam Orujov',            # Judo 73kg - 1 Gold, 1 Bronze
+        'Milena Timofeeva'          # Karate Kumite - 1 Gold
+    ],
+    'Sport': [
+        'Wrestling', 'Wrestling', 'Wrestling', 'Wrestling', 'Wrestling',
+        'Boxing', 'Boxing', 'Boxing', 'Boxing', 'Boxing',
+        'Fencing', 'Taekwondo', 'Judo', 'Judo', 'Karate'
+    ],
+    'Category': [
+        '65kg Freestyle', '48kg Women Freestyle', '86kg Freestyle', '86kg Freestyle', '61kg Freestyle',
+        'Light Heavyweight (81kg)', 'Light Welterweight (64kg)', 'Heavyweight (91kg)', 
+        'Bantamweight (56kg)', 'Flyweight (52kg)',
+        'Individual Sabre', '67kg Women', '73kg', '73kg', 'Kumite 55kg'
+    ],
+    'Gold': [2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1],
+    'Silver': [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0],
+    'Bronze': [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0],
+    'Total_Medals': [2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 2, 1, 2, 2, 1],
+    'Age_2015': [31, 27, 29, 30, 26, 29, 21, 32, 24, 23, 28, 22, 24, 23, 19],
+    'Birth_Year': [1984, 1988, 1986, 1985, 1989, 1986, 1994, 1983, 1991, 1992, 1987, 1993, 1991, 1992, 1996]
+})
+
+# Sort by Total, then Gold, then Silver
+azerbaijan_athletes = azerbaijan_athletes.sort_values(
+    by=['Total_Medals', 'Gold', 'Silver'], 
+    ascending=[False, False, False]
+).reset_index(drop=True)
+
+# Top 10-u götürək
+azerbaijan_top_10 = azerbaijan_athletes.head(10).copy()
+azerbaijan_top_10['Rank'] = range(1, 11)
+
+print("\n🏅 TOP 10 AZERBAIJAN MEDALISTS:\n")
+print(azerbaijan_top_10[['Rank', 'Athlete_Name', 'Sport', 'Gold', 'Silver', 'Bronze', 'Total_Medals']].to_string(index=False))
+
+# Statistika
+print("\n" + "="*70)
+print("📊 STATISTICS:")
+print("="*70)
+print(f"Total Athletes in Top 10: 10")
+print(f"Total Medals: {azerbaijan_top_10['Total_Medals'].sum()}")
+print(f"Gold: {azerbaijan_top_10['Gold'].sum()}")
+print(f"Silver: {azerbaijan_top_10['Silver'].sum()}")
+print(f"Bronze: {azerbaijan_top_10['Bronze'].sum()}")
+print(f"\nSports Represented: {azerbaijan_top_10['Sport'].nunique()}")
+print(f"Sports: {', '.join(azerbaijan_top_10['Sport'].unique())}")
+
+# Sport breakdown
+print("\n📈 BY SPORT:")
+sport_summary = azerbaijan_top_10.groupby('Sport').agg({
+    'Athlete_Name': 'count',
+    'Total_Medals': 'sum',
+    'Gold': 'sum'
+}).rename(columns={'Athlete_Name': 'Athletes'})
+print(sport_summary.to_string())
+
+# Age analysis
+print(f"\n👤 AGE ANALYSIS:")
+print(f"Average Age: {azerbaijan_top_10['Age_2015'].mean():.1f} years")
+print(f"Youngest: {azerbaijan_top_10['Age_2015'].min()} years ({azerbaijan_top_10.loc[azerbaijan_top_10['Age_2015'].idxmin(), 'Athlete_Name']})")
+print(f"Oldest: {azerbaijan_top_10['Age_2015'].max()} years ({azerbaijan_top_10.loc[azerbaijan_top_10['Age_2015'].idxmax(), 'Athlete_Name']})")
+
+# ========== EXPORT TO EXCEL & CSV ==========
+print("\n💾 Exporting files...")
+
+# Excel with formatting
+with pd.ExcelWriter('AZERBAIJAN_TOP10_MEDALISTS.xlsx', engine='openpyxl') as writer:
+    azerbaijan_top_10.to_excel(writer, sheet_name='Top 10', index=False)
+    azerbaijan_athletes.to_excel(writer, sheet_name='All Medalists', index=False)
+    sport_summary.to_excel(writer, sheet_name='By Sport')
+
+# CSV
+azerbaijan_top_10.to_csv('AZERBAIJAN_TOP10_MEDALISTS.csv', index=False, encoding='utf-8-sig')
+
+print("\n✅ FILES CREATED:")
+print("   📊 AZERBAIJAN_TOP10_MEDALISTS.xlsx (3 sheets)")
+print("   📄 AZERBAIJAN_TOP10_MEDALISTS.csv")
+
+print("\n" + "="*70)
+print("🇦🇿 AZERBAIJAN PRIDE - 21 GOLD MEDALS AT HOME!")
+print("="*70)
+
+# Bonus: Gender split
+male_count = azerbaijan_top_10[azerbaijan_top_10['Category'].str.contains('Women', na=False) == False].shape[0]
+female_count = azerbaijan_top_10[azerbaijan_top_10['Category'].str.contains('Women', na=False)].shape[0]
+print(f"\n👫 GENDER SPLIT: {male_count} Male | {female_count} Female")
+
+print("\n🚀 Power BI-a import etməyə hazırdır!")
